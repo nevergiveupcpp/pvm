@@ -7,9 +7,10 @@ on:
     branches: ["master"]
 
 jobs:
-  test:
+  unittests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    if: github.event_name == 'pull_request'
 
     strategy:
       fail-fast: false
@@ -105,3 +106,11 @@ jobs:
           comment-on-alert: true
           alert-threshold: '150%'
           fail-on-alert: true
+
+  all-checks:
+    name: all-checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: unittests
+    steps:
+      - run: echo "All checks passed"
