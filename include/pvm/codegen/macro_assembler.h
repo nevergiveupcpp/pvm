@@ -45,14 +45,14 @@ namespace ngu::pvm {
 
         // dst = 0
         consteval auto ZERO(const arch::reg dst) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 XOR(dst, operand(dst))
             };
         }
 
         // dst = -dst (two's complement)
         consteval auto NEG(const arch::reg dst) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 NOT(dst),
                 ADD(dst, operand(1u))
             };
@@ -60,7 +60,7 @@ namespace ngu::pvm {
 
         // dst = src (via xor+or)
         consteval auto MOVC(const arch::reg dst, const arch::reg src) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 XOR(dst, operand(dst)),
                 OR(dst, operand(src))
             };
@@ -68,7 +68,7 @@ namespace ngu::pvm {
 
         // dst = (hi << 32) | lo
         consteval auto MOV64(const arch::reg dst, std::uint32_t hi, std::uint32_t lo) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(dst, operand(hi)),
                 SHL(dst, operand(32u)),
                 OR(dst, operand(lo))
@@ -77,7 +77,7 @@ namespace ngu::pvm {
 
         // swap a, b without temp
         consteval auto SWAP(const arch::reg a, const arch::reg b) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 XOR(a, operand(b)),
                 XOR(b, operand(a)),
                 XOR(a, operand(b))
@@ -86,7 +86,7 @@ namespace ngu::pvm {
 
         // dst = |dst| (signed). scratch is clobbered.
         consteval auto ABS(const arch::reg dst, const arch::reg scratch, std::uint32_t label_id) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(scratch, operand(dst)),
                 SHR(scratch, operand(63u)),     // scratch = 1 if negative, 0 if positive/zero
                 CMP(scratch, operand(0u)),
@@ -99,7 +99,7 @@ namespace ngu::pvm {
 
         // a = min(a, b) unsigned. scratch is clobbered.
         consteval auto MIN(const arch::reg a, const arch::reg b, const arch::reg scratch, std::uint32_t label_id) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 CMP(a, operand(b)),                                 // bit0=EQ, bit1=LT(a<b unsigned)
                 JEL(label_id),                                          // if a == b, keep a
                 MOV(scratch, operand(arch::reg::REG_FLAGS)),      // save flags before they're clobbered
@@ -113,7 +113,7 @@ namespace ngu::pvm {
 
         // a = max(a, b) unsigned. scratch is clobbered.
         consteval auto MAX(const arch::reg a, const arch::reg b, const arch::reg scratch, std::uint32_t label_id) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 CMP(a, operand(b)),                                 // bit0=EQ, bit1=LT(a<b unsigned)
                 JEL(label_id),                                          // if a == b, keep a
                 MOV(scratch, operand(arch::reg::REG_FLAGS)),      // save flags before they're clobbered
@@ -127,21 +127,21 @@ namespace ngu::pvm {
 
         // dst *= 2^n
         consteval auto MUL_POW2(const arch::reg dst, std::uint8_t n) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 SHL(dst, operand(n))
             };
         }
 
         // dst /= 2^n (unsigned)
         consteval auto DIV_POW2(const arch::reg dst, std::uint8_t n) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 SHR(dst, operand(n))
             };
         }
 
         // dst *= 3
         consteval auto MUL3(const arch::reg dst, const arch::reg scratch) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(scratch, operand(dst)),
                 SHL(scratch, operand(1u)),
                 ADD(dst, operand(scratch))
@@ -150,7 +150,7 @@ namespace ngu::pvm {
 
         // dst *= 5
         consteval auto MUL5(const arch::reg dst, const arch::reg scratch) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(scratch, operand(dst)),
                 SHL(scratch, operand(2u)),
                 ADD(dst, operand(scratch))
@@ -159,7 +159,7 @@ namespace ngu::pvm {
 
         // dst = (dst + align-1) & ~(align-1), align must be power of 2
         consteval auto ALIGN_UP(const arch::reg dst, std::uint32_t align) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 ADD(dst, operand(align - 1)),
                 AND(dst, operand(~(align - 1)))
             };
@@ -168,7 +168,7 @@ namespace ngu::pvm {
         // (lo, hi) += 1 with carry
         consteval auto INC64(const arch::reg lo, const arch::reg hi,
                              std::uint32_t label_id) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 ADD(lo, operand(1u)),
                 CMP(lo, operand(0u)),
                 JNEL(label_id),
@@ -181,7 +181,7 @@ namespace ngu::pvm {
         consteval auto ADD64(const arch::reg dst_lo, const arch::reg dst_hi,
                              const arch::reg src_lo, const arch::reg src_hi,
                              const arch::reg tmp, std::uint32_t label_id) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(tmp, operand(dst_lo)),
                 ADD(dst_lo, operand(src_lo)),
                 CMP(dst_lo, operand(tmp)),
@@ -194,7 +194,7 @@ namespace ngu::pvm {
 
         // flags = (src >> bit) & 1 == 0
         consteval auto TEST_BIT(const arch::reg src, const arch::reg scratch, std::uint8_t bit) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(scratch, operand(1u)),
                 SHL(scratch, operand(bit)),
                 AND(scratch, operand(src)),
@@ -204,21 +204,21 @@ namespace ngu::pvm {
 
         // dst &= (1 << n) - 1
         consteval auto MASK_LO(const arch::reg dst, std::uint8_t n) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 AND(dst, operand((1ull << n) - 1))
             };
         }
 
         // dst &= ~((1 << n) - 1)
         consteval auto CLEAR_LO(const arch::reg dst, std::uint8_t n) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 AND(dst, operand(~((1ull << n) - 1)))
             };
         }
 
         // scratch = (src >> idx*8) & 0xFF
         consteval auto EXTRACT_BYTE(const arch::reg src, const arch::reg scratch, std::uint8_t idx) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(scratch, operand(src)),
                 SHR(scratch, operand(static_cast<std::uint8_t>(idx * 8u))),
                 AND(scratch, operand(0xFFu))
@@ -227,7 +227,7 @@ namespace ngu::pvm {
 
         // dst |= (scratch & 0xFF) << idx*8
         consteval auto INSERT_BYTE(const arch::reg dst, const arch::reg scratch, std::uint8_t idx) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 AND(scratch, operand(0xFFu)),
                 SHL(scratch, operand(static_cast<std::uint8_t>(idx * 8u))),
                 OR(dst, operand(scratch))
@@ -236,14 +236,14 @@ namespace ngu::pvm {
 
         // dst = swap upper/lower 16 bits
         consteval auto ROT16(const arch::reg dst) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 ROL(dst, operand(16u))
             };
         }
 
         // dst = byte-reverse dst
         consteval auto BSWAP32(const arch::reg dst, const arch::reg s1, const arch::reg s2) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(s1, operand(dst)),
                 AND(s1, operand(0xFFu)),
                 SHL(s1, operand(24u)),
@@ -266,7 +266,7 @@ namespace ngu::pvm {
         // a += b; c ^= a; c <<<= n
         consteval auto ARX(const arch::reg a, const arch::reg b,
                            const arch::reg c, std::uint8_t rot) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 ADD(a, operand(b)),
                 XOR(c, operand(a)),
                 ROL(c, operand(rot))
@@ -275,7 +275,7 @@ namespace ngu::pvm {
 
         // a ^= b; a <<<= n
         consteval auto XR(const arch::reg a, const arch::reg b, std::uint8_t rot) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 XOR(a, operand(b)),
                 ROL(a, operand(rot))
             };
@@ -283,7 +283,7 @@ namespace ngu::pvm {
 
         // a += b; c ^= a
         consteval auto AX(const arch::reg a, const arch::reg b, const arch::reg c) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 ADD(a, operand(b)),
                 XOR(c, operand(a))
             };
@@ -292,7 +292,7 @@ namespace ngu::pvm {
         // scratch = (v << left) ^ (v >> right)
         consteval auto XS(const arch::reg v, const arch::reg scratch,
                           const arch::reg tmp, std::uint8_t left, std::uint8_t right) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 MOV(scratch, operand(v)),
                 SHL(scratch, operand(left)),
                 MOV(tmp, operand(v)),
@@ -303,7 +303,7 @@ namespace ngu::pvm {
 
         // counter -= 1; jump to body_label if counter != 0
         consteval auto LOOP(const arch::reg counter, std::uint32_t body_label) const {
-            return detail::insn_seq{
+            return detail::instruction_sequence{
                 SUB(counter, operand(1u)),
                 CMP(counter, operand(0u)),
                 JNEL(body_label)

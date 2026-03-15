@@ -1,4 +1,4 @@
-name: ci
+name: CI
 
 on:
   push:
@@ -16,37 +16,37 @@ jobs:
 
       matrix:
         include:
-          - name: Windows (MSVC x64)
+          - name: Windows x64 / MSVC
             os: windows-latest
             preset: msvc-x64
             vcpkg_triplet: x64-windows
 
-          - name: Windows (Clang x64)
+          - name: Windows x64 / Clang
             os: windows-latest
             preset: llvm-x64
             vcpkg_triplet: x64-windows
 
-          - name: Windows ARM64 (MSVC)
+          - name: Windows ARM64 / MSVC
             os: windows-11-arm
             preset: msvc-arm64
             vcpkg_triplet: arm64-windows
 
-          - name: Linux (GCC x64)
+          - name: Linux x64 / GCC
             os: ubuntu-latest
             preset: gcc-linux-x64
             vcpkg_triplet: x64-linux-dynamic
 
-          - name: Linux (Clang x64)
+          - name: Linux x64 / Clang
             os: ubuntu-latest
             preset: clang-linux-x64
             vcpkg_triplet: x64-linux-dynamic
 
-          - name: Linux ARM64 (GCC)
+          - name: Linux ARM64 / GCC
             os: ubuntu-24.04-arm
             preset: gcc-linux-arm64
             vcpkg_triplet: arm64-linux
 
-          - name: macOS ARM64 (Clang)
+          - name: macOS ARM64 / AppleClang
             os: macos-latest
             preset: apple-clang-macos-arm64
             vcpkg_triplet: arm64-osx
@@ -57,13 +57,6 @@ jobs:
       - name: Set VCPKG_ROOT
         shell: bash
         run: echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
-
-      - name: Install Clang 18
-        if: matrix.preset == 'clang-linux-x64'
-        run: |
-          sudo apt-get install -y clang-18
-          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-18   100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100
 
       - name: Install GTest
         run: vcpkg install gtest:${{ matrix.vcpkg_triplet }}
