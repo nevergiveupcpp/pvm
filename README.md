@@ -58,7 +58,7 @@ Alternatively, you can include individual subsystems directly.
 1. Install `vcpkg` and set `VCPKG_ROOT` environment variable
 2. Fetch baseline: `cd $VCPKG_ROOT && git fetch origin 34823ada10080ddca99b60e85f80f55e18a44eea`
 3. Configure: `cmake --preset <compiler>` (MSVC/Clang/GCC)
-4. Build: `cmake --build --preset <compiler>` (--config Release/Debug)
+4. Build: `cmake --build --preset <compiler>` (--config Release)
 
 ## Requirements
 - C++20 or later
