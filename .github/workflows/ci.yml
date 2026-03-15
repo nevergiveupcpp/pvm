@@ -67,3 +67,41 @@ jobs:
       - name: Test
         working-directory: tests/unittest/build/${{ matrix.preset }}
         run: ctest --build-config Release --output-on-failure
+
+  benchmark:
+    name: Benchmark
+    runs-on: windows-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set VCPKG_ROOT
+        shell: bash
+        run: echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
+
+      - name: Install Google Benchmark
+        run: vcpkg install benchmark:x64-windows
+
+      - name: Configure
+        working-directory: tests/benchmark
+        run: cmake --preset msvc-x64
+
+      - name: Build
+        working-directory: tests/benchmark
+        run: cmake --build --preset msvc-x64 --config Release
+
+      - name: Run
+        working-directory: tests/benchmark/build/msvc-x64/Release
+        run: ./benchmark-pvm.exe --benchmark_format=json --benchmark_out=result.json
+
+      - name: Store results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: googlecpp
+          output-file-path: tests/benchmark/build/msvc-x64/Release/result.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          comment-on-alert: true
+          alert-threshold: '150%'
+          fail-on-alert: true
