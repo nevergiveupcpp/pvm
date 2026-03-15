@@ -75,10 +75,12 @@ Alternatively, you can include individual subsystems directly.
 ### Architectures
 - x86
 - x86-64
+- ARM64
 
 ### Operating Systems
 - Windows
 - Linux
+- macOS
 
 ## License
 **pvm** is distributed under the [Apache License 2.0](LICENSE).
