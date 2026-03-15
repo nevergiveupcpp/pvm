@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1773579425102,
+  "lastUpdate": 1773579718090,
   "repoUrl": "https://github.com/nevergiveupcpp/pvm",
   "entries": {
     "Benchmark": [
@@ -120,6 +120,66 @@ window.BENCHMARK_DATA = {
             "value": 1277.2326217712048,
             "unit": "ns/iter",
             "extra": "iterations: 497778\ncpu: 1255.5797966161622 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "217945237+nevergiveupcpp@users.noreply.github.com",
+            "name": "Alexander",
+            "username": "nevergiveupcpp"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5247bf5ac414fea15e01db42c6644999a80f6a72",
+          "message": "Merge pull request #5 from nevergiveupcpp/ngu/docs\n\ndocs: update readme",
+          "timestamp": "2026-03-15T19:59:23+07:00",
+          "tree_id": "a55d082a372953f577b0e1aa858b960508cb766c",
+          "url": "https://github.com/nevergiveupcpp/pvm/commit/5247bf5ac414fea15e01db42c6644999a80f6a72"
+        },
+        "date": 1773579716076,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "VirtualMachineBenchmark/XteaDecrypt_Native",
+            "value": 93.5920940360761,
+            "unit": "ns/iter",
+            "extra": "iterations: 7466667\ncpu: 94.16852258176239 ns\nthreads: 1"
+          },
+          {
+            "name": "VirtualMachineBenchmark/XteaDecrypt_VM",
+            "value": 21503.04103069927,
+            "unit": "ns/iter",
+            "extra": "iterations: 34462\ncpu: 21309.703441471767 ns\nthreads: 1"
+          },
+          {
+            "name": "VirtualMachineBenchmark/Rc4KeystreamXor_Native",
+            "value": 3.1373843749997423,
+            "unit": "ns/iter",
+            "extra": "iterations: 224000000\ncpu: 3.138950892857143 ns\nthreads: 1"
+          },
+          {
+            "name": "VirtualMachineBenchmark/Rc4KeystreamXor_VM",
+            "value": 278.89351245058884,
+            "unit": "ns/iter",
+            "extra": "iterations: 2635294\ncpu: 284.59822699099226 ns\nthreads: 1"
+          },
+          {
+            "name": "VirtualMachineBenchmark/ChaCha20QuarterRound_Native",
+            "value": 6.037234821428276,
+            "unit": "ns/iter",
+            "extra": "iterations: 112000000\ncpu: 5.998883928571429 ns\nthreads: 1"
+          },
+          {
+            "name": "VirtualMachineBenchmark/ChaCha20QuarterRound_VM",
+            "value": 1286.586607142835,
+            "unit": "ns/iter",
+            "extra": "iterations: 560000\ncpu: 1283.482142857143 ns\nthreads: 1"
           }
         ]
       }
