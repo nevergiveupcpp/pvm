@@ -52,7 +52,7 @@ Alternatively, you can include individual subsystems directly.
         std::cout << r1 << std::endl;
     }
 ```
->> To see more advanced implementation examples, check out the [tests](tests) directory.
+> To see more advanced implementation examples, check out the [tests](tests) directory.
 
 ## Building tests and benchmarks
 1. Install `vcpkg` and set `VCPKG_ROOT` environment variable
