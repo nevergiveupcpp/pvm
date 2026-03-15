@@ -108,7 +108,7 @@ jobs:
           fail-on-alert: true
 
   all-checks:
-    name: all-checks
+    name: All Checks
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     needs: unittests
