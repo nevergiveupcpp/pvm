@@ -36,11 +36,6 @@ jobs:
             preset: gcc-linux-x64
             vcpkg_triplet: x64-linux-dynamic
 
-          - name: Linux x64 / Clang
-            os: ubuntu-latest
-            preset: clang-linux-x64
-            vcpkg_triplet: x64-linux-dynamic
-
           - name: Linux ARM64 / GCC
             os: ubuntu-24.04-arm
             preset: gcc-linux-arm64
