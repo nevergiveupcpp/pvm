@@ -29,7 +29,8 @@ namespace ngu::pvm {
          *
          * @c header    - encoded 32-bit instruction word. @n
          * @c immediate - immediate value (0 if absent). @n
-         * @c insn_sz   - instruction size variant; used by @c size() to compute the total byte length.
+         * @c insn_sz   - instruction size variant; used by @c size() to compute the total byte
+         * length.
          */
         struct instruction_data {
             constexpr std::size_t size() const {
@@ -44,25 +45,25 @@ namespace ngu::pvm {
         using insn_data = instruction_data;
 
         /**
-         * @brief A fixed-size compile-time array of @ref instruction_data produced by @ref macro_assembler methods.
+         * @brief A fixed-size compile-time array of @ref instruction_data produced by @ref
+         * macro_assembler methods.
          *
          * @c count - number of instructions, deduced from the @c Types pack. @n
          * @c data  - array of encoded instructions.
          *
          * @tparam Types Pack of @ref instruction_data instances; its size determines @c count.
          */
-        template <typename... Types> struct instruction_sequence {
+        template<typename... Types> struct instruction_sequence {
             static constexpr std::size_t count = sizeof...(Types);
 
-            consteval explicit instruction_sequence(Types&&... args)
-                : data{ static_cast<instruction_data>(args)... } {}
+            consteval explicit instruction_sequence(Types&&... args) : data{static_cast<instruction_data>(args)...} {
+            }
 
             instruction_data data[sizeof...(Types)];
         };
 
-        template <typename... Types>
-        using insn_seq = instruction_sequence<Types...>;
-    }
+        template<typename... Types> using insn_seq = instruction_sequence<Types...>;
+    } // namespace detail
 
     /**
      * @brief Unified operand type accepted by @ref assembler and @ref macro_assembler methods.
@@ -70,19 +71,21 @@ namespace ngu::pvm {
      * Constructed from an integral immediate value or an @c arch::reg register. @n
      * @c value     - register index or immediate value. @n
      * @c is_imm    - true if constructed from an integral value; false if from @c arch::reg. @n
-     * @c is_signed - true if the integral type is signed; used to select the minimal instruction size.
+     * @c is_signed - true if the integral type is signed; used to select the minimal instruction
+     * size.
      */
     struct operand {
-        template<typename Type>
-        explicit constexpr operand(const Type v) requires std::is_unsigned_v<Type> || std::is_integral_v<Type>
-            : value(v), is_imm(true), is_signed(std::is_signed_v<Type>) {}
-        constexpr explicit operand(const arch::reg r)
-            : value(r) {}
+        template<typename Type> explicit constexpr operand(const Type v)
+            requires std::is_unsigned_v<Type> || std::is_integral_v<Type>
+            : value(v), is_signed(std::is_signed_v<Type>), is_imm(true) {
+        }
+        constexpr explicit operand(const arch::reg r) : value(r) {
+        }
 
         std::uint64_t value{};
         bool is_signed{};
         bool is_imm{};
     };
-}
+} // namespace ngu::pvm
 
-#endif //NGU_PVM_CODEGEN_CODEGEN_TYPES_H
+#endif // NGU_PVM_CODEGEN_CODEGEN_TYPES_H

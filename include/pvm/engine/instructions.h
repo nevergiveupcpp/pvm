@@ -27,9 +27,9 @@ namespace ngu::pvm {
     /**
      * @brief Instruction dispatcher based on the Strategy pattern.
      *
-     * @c execute() constructs a temporary @c Strategy object and calls @c impl() with the provided arguments.
-     * The pattern allows swapping primitive implementations - for example,
-     * obfuscated variants such as @c xored_mov, @c xored_add, etc. could be introduced in the future.
+     * @c execute() constructs a temporary @c Strategy object and calls @c impl() with the provided
+     * arguments. The pattern allows swapping primitive implementations - for example, obfuscated
+     * variants such as @c xored_mov, @c xored_add, etc. could be introduced in the future.
      *
      * @tparam Strategy Type implementing the @c impl() method with the required signature.
      */
@@ -39,73 +39,72 @@ namespace ngu::pvm {
         }
     };
 
-    template<typename Strategy>
-    using insn_dispatch = instruction_dispatch<Strategy>;
+    template<typename Strategy> using insn_dispatch = instruction_dispatch<Strategy>;
 
     struct mov_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const val = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->set_reg(insn.destination(), val);
         }
     };
 
     struct xor_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const val = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->set_reg(insn.destination(), ctx->get_reg(insn.destination()) ^ val);
         }
     };
 
     struct add_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const val = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->set_reg(insn.destination(), ctx->get_reg(insn.destination()) + val);
         }
     };
 
     struct sub_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const val = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->set_reg(insn.destination(), ctx->get_reg(insn.destination()) - val);
         }
     };
 
     struct shl_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const shift = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->set_reg(insn.destination(), ctx->get_reg(insn.destination()) << shift);
         }
     };
 
     struct shr_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const shift = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->set_reg(insn.destination(), ctx->get_reg(insn.destination()) >> shift);
         }
     };
 
     struct and_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const val = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->set_reg(insn.destination(), ctx->get_reg(insn.destination()) & val);
         }
     };
 
     struct or_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const val = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->set_reg(insn.destination(), ctx->get_reg(insn.destination()) | val);
         }
     };
 
     struct not_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             ctx->set_reg(insn.destination(), ~ctx->get_reg(insn.destination()));
         }
     };
 
     struct rol_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const val = ctx->get_reg(insn.destination());
             auto shift = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             shift &= 63;
@@ -114,7 +113,7 @@ namespace ngu::pvm {
     };
 
     struct ror_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const val = ctx->get_reg(insn.destination());
             auto shift = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             shift &= 63;
@@ -123,34 +122,38 @@ namespace ngu::pvm {
     };
 
     struct cmp_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const a = ctx->get_reg(insn.destination());
             auto const b = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
 
             std::uint64_t flags{};
-            if (a == b) flags |= (1ULL << 0);
-            if (a < b)  flags |= (1ULL << 1);
+            if (a == b) {
+                flags |= (1ULL << 0);
+            }
+            if (a < b) {
+                flags |= (1ULL << 1);
+            }
 
             ctx->set_flags(flags);
         }
     };
 
     struct jmp_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const offset = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->jump(ctx->get_pc() + insn.size() + offset);
         }
     };
 
     struct jmpa_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             auto const offset = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             ctx->jump(offset);
         }
     };
 
     struct jmpi_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn, const insn_stream_rt& insn_entries) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn, const insn_stream_rt& insn_entries) {
             auto const pos = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
 
             if (pos >= insn_entries.size()) {
@@ -162,7 +165,7 @@ namespace ngu::pvm {
     };
 
     struct jne_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             if (!(ctx->get_flags() & 1)) {
                 auto const offset = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
                 ctx->jump(ctx->get_pc() + insn.size() + offset);
@@ -171,7 +174,7 @@ namespace ngu::pvm {
     };
 
     struct je_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
             if (ctx->get_flags() & 1) {
                 auto const offset = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
                 ctx->jump(ctx->get_pc() + insn.size() + offset);
@@ -180,7 +183,7 @@ namespace ngu::pvm {
     };
 
     struct jnei_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn, const insn_stream_rt& insn_entries) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn, const insn_stream_rt& insn_entries) {
             if (!(ctx->get_flags() & 1)) {
                 auto const pos = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
 
@@ -194,7 +197,7 @@ namespace ngu::pvm {
     };
 
     struct jei_base {
-        PVM_FORCEINLINE static void impl(context *ctx, const insn_view& insn, const insn_stream_rt& insn_entries) {
+        PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn, const insn_stream_rt& insn_entries) {
             if (ctx->get_flags() & 1) {
                 auto const pos = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
 
@@ -208,16 +211,16 @@ namespace ngu::pvm {
     };
 
     struct halt_base {
-        PVM_FORCEINLINE static void impl(context *ctx) {
+        PVM_FORCEINLINE static void impl(context* ctx) {
             ctx->halt();
         }
     };
 
     struct nop_base {
         PVM_FORCEINLINE static void impl() {
-            //NOP
+            // NOP
         }
     };
-}
+} // namespace ngu::pvm
 
-#endif //NGU_PVM_ENGINE_INSTRUCTIONS_H
+#endif // NGU_PVM_ENGINE_INSTRUCTIONS_H

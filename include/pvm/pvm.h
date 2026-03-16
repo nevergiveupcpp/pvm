@@ -23,4 +23,4 @@
 #include "codegen/macro_assembler.h"
 #include "codegen/codegen.h"
 
-#endif //NGU_PVM_H
+#endif // NGU_PVM_H

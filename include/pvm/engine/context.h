@@ -32,19 +32,21 @@ namespace ngu::pvm {
      * allowing the context to be created at compile time.
      *
      * @par Fields
-     * @c arch_    - copy of the @ref architecture object; defines physical indices of registers and opcodes. @n
+     * @c arch_    - copy of the @ref architecture object; defines physical indices of registers and
+     * opcodes. @n
      * @c regs_    - register value array, indexed by physical indices. @n
      * @c halted_  - execution stop flag; set via @ref halt().
      *
      * @par Methods
      * Each register operation is available in two variants: @n
-     * - runtime (@c PVM_FORCEINLINE): @c set_reg, @c get_reg, @c set_flags, @c set_pc, @c jump, @c halt. @n
+     * - runtime (@c PVM_FORCEINLINE): @c set_reg, @c get_reg, @c set_flags, @c set_pc, @c jump, @c
+     * halt. @n
      * - compile-time (@c consteval):  @c set_reg_ct, @c set_flags_ct, @c set_pc_ct.
      */
     class context {
     public:
-        explicit consteval context(const architecture& arch) :
-            arch_(arch) {};
+        explicit consteval context(const architecture& arch) : arch_(arch) {
+        }
 
         /// @brief Writes @p val to register at physical index @p idx.
         PVM_FORCEINLINE void set_reg(const std::uint8_t idx, const std::uint64_t val) {
@@ -126,6 +128,6 @@ namespace ngu::pvm {
         std::uint64_t regs_[arch::reg::REG_MAX]{};
         bool halted_{};
     };
-}
+} // namespace ngu::pvm
 
-#endif //NGU_PVM_ENGINE_CONTEXT_H
+#endif // NGU_PVM_ENGINE_CONTEXT_H

@@ -107,10 +107,21 @@ jobs:
           alert-threshold: '150%'
           fail-on-alert: true
 
+  clang-format:
+    name: Clang Format
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting
+        run: |
+          find include tests -name "*.h" -o -name "*.cpp" | \
+          xargs clang-format --dry-run --Werror
+
   all-checks:
     name: All Checks
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    needs: unittests
+    needs: [unittests, clang-format]
     steps:
       - run: echo "All checks passed"

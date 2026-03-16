@@ -27,17 +27,18 @@ namespace ngu::pvm {
         // - integral type   → 1 byte
         // - bytecode<N>     → N bytes (via ::capacity())
         // - raw array T[N]  → N bytes
-        template <typename T> consteval std::size_t contribution() {
+        template<typename T> consteval std::size_t contribution() {
             using U = std::remove_cvref_t<T>;
-            if constexpr (std::is_integral_v<U>)
+            if constexpr (std::is_integral_v<U>) {
                 return 1;
-            else if constexpr (requires { U::capacity(); })
+            } else if constexpr (requires { U::capacity(); }) {
                 return U::capacity();
-            else if constexpr (std::is_array_v<U>)
+            } else if constexpr (std::is_array_v<U>) {
                 return std::extent_v<U>;
+            }
             return 0;
         }
-    }
+    } // namespace detail
 
     /**
      * @brief Fixed-capacity compile-time byte buffer holding @p N bytes of bytecode.
@@ -49,15 +50,15 @@ namespace ngu::pvm {
      * - @c std::uint8_t   - single byte; @n
      * - @c bytecode<M>    - another bytecode buffer (contributes M bytes); @n
      * - raw array @c T[M] - contributes M bytes. @n
-     * The deduction guide computes @p N as the sum of all argument contributions at compile time. @n
-     * Array constructor - copies the first @c len bytes from a @c uint8_t[N] array.
+     * The deduction guide computes @p N as the sum of all argument contributions at compile time.
+     * @n Array constructor - copies the first @c len bytes from a @c uint8_t[N] array.
      *
      * @par Fields
      * @c bytes   - raw byte storage. @n
      * @c length  - number of bytes written; never exceeds @p N.
      */
     template<std::size_t N> struct bytecode {
-        template <typename... Args> consteval explicit bytecode(Args&&... args) {
+        template<typename... Args> consteval explicit bytecode(Args&&... args) {
             (append(std::forward<Args>(args)), ...);
         }
 
@@ -87,7 +88,7 @@ namespace ngu::pvm {
             }
         }
 
-        template <std::size_t M> consteval void append(std::uint8_t const (&arr)[M]) {
+        template<std::size_t M> consteval void append(std::uint8_t const (&arr)[M]) {
             for (std::size_t i = 0; i < M && length < N; ++i) {
                 bytes[length++] = arr[i];
             }
@@ -100,7 +101,7 @@ namespace ngu::pvm {
         }
     };
 
-    template <typename... Args> bytecode(Args&&... args) -> bytecode<(detail::contribution<Args>() + ...)>;
-}
+    template<typename... Args> bytecode(Args&&... args) -> bytecode<(detail::contribution<Args>() + ...)>;
+} // namespace ngu::pvm
 
-#endif //NGU_PVM_BYTECODE_BYTECODE_H
+#endif // NGU_PVM_BYTECODE_BYTECODE_H
