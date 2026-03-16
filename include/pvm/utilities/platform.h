@@ -24,4 +24,4 @@
 #define PVM_FORCEINLINE __forceinline
 #endif
 
-#endif //NGU_PVM_UTILITIES_PLATFORM_H
+#endif // NGU_PVM_UTILITIES_PLATFORM_H

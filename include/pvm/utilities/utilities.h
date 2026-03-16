@@ -44,8 +44,9 @@ namespace ngu::pvm {
         }
 
         template<typename Fn> constexpr void for_each(Fn&& fn) const {
-            for (std::size_t i{}; i < size(); ++i)
+            for (std::size_t i{}; i < size(); ++i) {
                 fn((*this)[i]);
+            }
         }
 
     protected:
@@ -65,12 +66,12 @@ namespace ngu::pvm {
      */
     template<class From, class To = std::uint8_t> struct mapping_entry {
         constexpr mapping_entry() = default;
-        consteval mapping_entry(const From from, const To to) :
-            from(from), to(to) {}
+        consteval mapping_entry(const From from, const To to) : from(from), to(to) {
+        }
 
         From from{};
         To to{};
     };
-}
+} // namespace ngu::pvm
 
-#endif //NGU_PVM_UTILITIES_UTILITIES_H
+#endif // NGU_PVM_UTILITIES_UTILITIES_H

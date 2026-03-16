@@ -32,19 +32,20 @@ TEST_F(VirtualMachineTest, XteaDecryptRoundTrip) {
 
     static constexpr auto cipher = crypto::xtea_encrypt(PLAIN_V0, PLAIN_V1, KEY);
 
-    constexpr std::uint64_t LOOP_START   = 1;
+    constexpr std::uint64_t LOOP_START = 1;
     constexpr std::uint64_t SWITCH1_KEY1 = 2;
     constexpr std::uint64_t SWITCH1_KEY2 = 3;
     constexpr std::uint64_t SWITCH1_KEY3 = 4;
-    constexpr std::uint64_t SWITCH1_END  = 5;
+    constexpr std::uint64_t SWITCH1_END = 5;
     constexpr std::uint64_t SWITCH2_KEY1 = 6;
     constexpr std::uint64_t SWITCH2_KEY2 = 7;
     constexpr std::uint64_t SWITCH2_KEY3 = 8;
-    constexpr std::uint64_t SWITCH2_END  = 9;
+    constexpr std::uint64_t SWITCH2_END = 9;
 
     // R1=v0(cipher), R2=v1(cipher), R3=sum, R4=delta, R5=rounds_counter
     // R6/R7/R8 = scratch
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(cipher.first)),
         cr.MOV(arch::reg::REG_R2, operand(cipher.second)),
         cr.MOV(arch::reg::REG_R3, operand(crypto::SUM_INIT)),
@@ -160,15 +161,16 @@ TEST_F(VirtualMachineTest, XteaDecryptRoundTrip) {
 // The keystream byte is pre-computed at compile time by the reference
 // implementation so the test stays self-contained and easy to read.
 TEST_F(VirtualMachineTest, Rc4KeystreamXor) {
-    constexpr std::uint8_t KEY[]    = {'K', 'e', 'y'};
-    constexpr std::size_t  KETLEN   = sizeof KEY;
-    constexpr std::uint8_t PLAIN    = 'P';
-    constexpr std::uint8_t KEYSTREAM  = crypto::rc4_keystream_byte(KEY, KETLEN);
+    constexpr std::uint8_t KEY[] = {'K', 'e', 'y'};
+    constexpr std::size_t KETLEN = sizeof KEY;
+    constexpr std::uint8_t PLAIN = 'P';
+    constexpr std::uint8_t KEYSTREAM = crypto::rc4_keystream_byte(KEY, KETLEN);
     constexpr std::uint8_t EXPECTED_CIPHER = crypto::rc4_process(KEY, KETLEN, PLAIN);
 
     static_assert(EXPECTED_CIPHER == (PLAIN ^ KEYSTREAM));
 
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(static_cast<std::uint64_t>(PLAIN))),
         cr.MOV(arch::reg::REG_R2, operand(static_cast<std::uint64_t>(KEYSTREAM))),
 
@@ -208,7 +210,8 @@ TEST_F(VirtualMachineTest, ChaCha20QuarterRound) {
     constexpr std::uint32_t EXPECTED_D = std::get<3>(expected);
 
     // R1=a, R2=b, R3=c, R4=d, R5/R6=scratch for rotl32
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(INPUT_A)),
         cr.MOV(arch::reg::REG_R2, operand(INPUT_B)),
         cr.MOV(arch::reg::REG_R3, operand(INPUT_C)),
@@ -279,4 +282,4 @@ TEST_F(VirtualMachineTest, ChaCha20QuarterRound) {
     EXPECT_EQ(static_cast<std::uint32_t>(test_vm.get_ctx()->get_reg(arch::reg::REG_R4)), EXPECTED_D);
 }
 
-#endif //NGU_PVM_TESTS_UNITTEST_CRYPTO_H
+#endif // NGU_PVM_TESTS_UNITTEST_CRYPTO_H

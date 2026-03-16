@@ -25,7 +25,8 @@ namespace ngu::pvm {
      * @brief Static utility set for extracting fields from a 32-bit instruction header.
      *
      * All methods accept a raw @c header and return the corresponding field
-     * according to the format: @c OPCODE(0) | INSN_SIZE(8) | MODE(11) | DESTINATION(12) | SOURCE(16).
+     * according to the format: @c OPCODE(0) | INSN_SIZE(8) | MODE(11) | DESTINATION(12) |
+     * SOURCE(16).
      */
     struct instruction_decoder {
         using bits = arch::insn_bits;
@@ -62,12 +63,11 @@ namespace ngu::pvm {
 
         /// @brief Returns the total instruction size in bytes (header + immediate).
         static constexpr std::size_t total_size(const std::uint32_t header) {
-            return detail::get_total_size(
-                static_cast<arch::insn_size>(insn_size(header))
-            );
+            return detail::get_total_size(static_cast<arch::insn_size>(insn_size(header)));
         }
 
-        /// @brief Reads the immediate value from @p data (little-endian) after the header. Returns 0 if no immediate is present.
+        /// @brief Reads the immediate value from @p data (little-endian) after the header. Returns
+        /// 0 if no immediate is present.
         static constexpr std::uint64_t immediate(const std::uint32_t header, const std::uint8_t* data) {
             if (!has_immediate(header)) {
                 return 0;
@@ -82,12 +82,11 @@ namespace ngu::pvm {
             return result;
         }
 
-        /// @brief Reads 4 bytes from @p data and assembles them into a 32-bit header (little-endian).
+        /// @brief Reads 4 bytes from @p data and assembles them into a 32-bit header
+        /// (little-endian).
         static constexpr std::uint32_t read_header(const std::uint8_t* data) {
-            return static_cast<std::uint32_t>(data[0]) |
-                   (static_cast<std::uint32_t>(data[1]) << 8) |
-                   (static_cast<std::uint32_t>(data[2]) << 16) |
-                   (static_cast<std::uint32_t>(data[3]) << 24);
+            return static_cast<std::uint32_t>(data[0]) | (static_cast<std::uint32_t>(data[1]) << 8) |
+                   (static_cast<std::uint32_t>(data[2]) << 16) | (static_cast<std::uint32_t>(data[3]) << 24);
         }
     };
 
@@ -102,10 +101,12 @@ namespace ngu::pvm {
      */
     class instruction_view {
     public:
-        explicit instruction_view(const std::uint32_t* ptr = nullptr) : ip_(ptr) {}
+        explicit instruction_view(const std::uint32_t* ptr = nullptr) : ip_(ptr) {
+        }
 
-        bool valid() const { return ip_ != nullptr; }
-        std::uint32_t data() const { return valid() ? *ip_ : 0; }
+        std::uint32_t data() const {
+            return valid() ? *ip_ : 0;
+        }
 
         std::uint8_t opcode() const {
             return insn_decoder::opcode(data());
@@ -131,13 +132,16 @@ namespace ngu::pvm {
             return insn_decoder::has_immediate(data());
         }
 
+        std::uint64_t immediate() const {
+            return valid() ? insn_decoder::immediate(data(), reinterpret_cast<const std::uint8_t*>(ip_ + 1)) : 0;
+        }
+
         std::size_t size() const {
             return insn_decoder::total_size(data());
         }
 
-        std::uint64_t immediate() const {
-            return valid() ? insn_decoder::immediate(data(),
-                reinterpret_cast<const std::uint8_t*>(ip_ + 1)) : 0;
+        bool valid() const {
+            return ip_ != nullptr;
         }
 
     private:
@@ -145,6 +149,6 @@ namespace ngu::pvm {
     };
 
     using insn_view = instruction_view;
-}
+} // namespace ngu::pvm
 
-#endif //NGU_PVM_BYTECODE_INSTRUCTION_DECODER_H
+#endif // NGU_PVM_BYTECODE_INSTRUCTION_DECODER_H

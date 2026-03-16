@@ -29,7 +29,7 @@ using namespace ngu::pvm;
 class VirtualMachineTest : public ::testing::Test {
 protected:
     static constexpr auto arch = architecture::make(1);
-    static constexpr auto cr   = macro_assembler(arch);
+    static constexpr auto cr = macro_assembler(arch);
 };
 
-#endif //NGU_PVM_TESTS_UNITTEST_FIXTURE_H
+#endif // NGU_PVM_TESTS_UNITTEST_FIXTURE_H

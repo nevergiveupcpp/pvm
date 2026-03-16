@@ -28,7 +28,8 @@
 namespace ngu::pvm {
     /// @brief Bytecode decoding mode.
     /// @c RUNTIME      - stores only instruction offsets; used by the interpreter at runtime. @n
-    /// @c COMPILE_TIME - additionally stores opcodes, immediates and metadata; builds a label table.
+    /// @c COMPILE_TIME - additionally stores opcodes, immediates and metadata; builds a label
+    /// table.
     enum decode_time { RUNTIME, COMPILE_TIME };
 
     /**
@@ -64,8 +65,7 @@ namespace ngu::pvm {
         std::conditional_t<DecodeTime == COMPILE_TIME, extension_data_ct, empty> data_ct{};
     };
 
-    template<decode_time DecodeTime>
-    using insn_entry = instruction_entry<DecodeTime>;
+    template<decode_time DecodeTime> using insn_entry = instruction_entry<DecodeTime>;
 
     using insn_entry_rt = insn_entry<RUNTIME>;
     using insn_entry_ct = insn_entry<COMPILE_TIME>;
@@ -74,7 +74,8 @@ namespace ngu::pvm {
      * @brief A single entry in the label table.
      *
      * @c label_id     - label identifier (immediate value from @c OP_LABEL). @n
-     * @c target_index - index of the next real instruction after the label (meta-instructions are not counted). @n
+     * @c target_index - index of the next real instruction after the label (meta-instructions are
+     * not counted). @n
      * @c target       - pointer to the next instruction entry in the stream.
      */
     struct label_entry {
@@ -84,14 +85,12 @@ namespace ngu::pvm {
     };
 
     /// @brief View over the decoder instruction stream. @tparam DecodeTime Decoding mode.
-    template<decode_time DecodeTime> class instruction_stream :
-        public indexed_view<instruction_stream<DecodeTime>> {
+    template<decode_time DecodeTime> class instruction_stream : public indexed_view<instruction_stream<DecodeTime>> {
     public:
         using value_type = instruction_entry<DecodeTime>;
 
-        constexpr instruction_stream(const value_type* data,
-                                     const std::size_t count)
-            : data_(data), count_(count) {}
+        constexpr instruction_stream(const value_type* data, const std::size_t count) : data_(data), count_(count) {
+        }
 
         constexpr const value_type& at_impl(std::size_t i) const {
             return data_[i];
@@ -106,8 +105,7 @@ namespace ngu::pvm {
         std::size_t count_;
     };
 
-    template<decode_time DecodeTime>
-    using insn_stream = instruction_stream<DecodeTime>;
+    template<decode_time DecodeTime> using insn_stream = instruction_stream<DecodeTime>;
 
     using insn_stream_rt = insn_stream<RUNTIME>;
     using insn_stream_ct = insn_stream<COMPILE_TIME>;
@@ -116,9 +114,8 @@ namespace ngu::pvm {
     struct label_table : public indexed_view<label_table> {
         using value_type = label_entry;
 
-        constexpr label_table(const value_type* data,
-                              const std::size_t count)
-            : data_(data), count_(count) {}
+        constexpr label_table(const value_type* data, const std::size_t count) : data_(data), count_(count) {
+        }
 
         constexpr const value_type& at_impl(std::size_t i) const {
             return data_[i];
@@ -146,9 +143,10 @@ namespace ngu::pvm {
     template<decode_time DecodeTime, std::size_t N> class bytecode_decoder {
         static constexpr std::size_t MAX_INSN = (N + 3) / 4; //(N + divisor - 1) / divisor
     public:
-        constexpr explicit bytecode_decoder(const bytecode<N> &code);
+        constexpr explicit bytecode_decoder(const bytecode<N>& code);
 
-        /// @brief Returns the instruction stream. @return @ref insn_stream for the given @c DecodeTime.
+        /// @brief Returns the instruction stream. @return @ref insn_stream for the given @c
+        /// DecodeTime.
         constexpr insn_stream<DecodeTime> get_instruction_stream() const {
             return insn_stream{insns_, insn_count_};
         }
@@ -169,10 +167,11 @@ namespace ngu::pvm {
         }
 
     private:
-        // Iterates over bytecode bytes and fills insns_[]. In COMPILE_TIME mode also extracts opcodes, immediates and meta flags.
+        // Iterates over bytecode bytes and fills insns_[]. In COMPILE_TIME mode also extracts
+        // opcodes, immediates and meta flags.
         constexpr void build_instruction_stream() {
-            const std::uint8_t *pc{ code_.bytes };
-            const std::uint8_t *end{ code_.bytes + code_.size() };
+            const std::uint8_t* pc{code_.bytes};
+            const std::uint8_t* end{code_.bytes + code_.size()};
             std::size_t index{};
 
             while (pc < end && index < MAX_INSN) {
@@ -198,7 +197,8 @@ namespace ngu::pvm {
             insn_count_ = index;
         }
 
-        // Scans insns_[] for OP_LABEL entries and fills labels_[]. new_idx counts only real (non-meta) instructions.
+        // Scans insns_[] for OP_LABEL entries and fills labels_[]. new_idx counts only real
+        // (non-meta) instructions.
         constexpr void build_label_table() {
             std::uint64_t new_idx{};
             for (std::size_t i{}; i < insn_count_; ++i) {
@@ -208,8 +208,7 @@ namespace ngu::pvm {
                     labels_[label_count_].target = &insns_[i + 1];
                     labels_[label_count_].target_index = new_idx;
                     ++label_count_;
-                }
-                else {
+                } else {
                     ++new_idx;
                 }
             }
@@ -229,12 +228,13 @@ namespace ngu::pvm {
         return bytecode_decoder<DecodeTime, N>(code);
     }
 
-    template<decode_time DecodeTime, std::size_t N> constexpr bytecode_decoder<DecodeTime, N>::bytecode_decoder(const bytecode<N> &code) : code_(code) {
+    template<decode_time DecodeTime, std::size_t N>
+    constexpr bytecode_decoder<DecodeTime, N>::bytecode_decoder(const bytecode<N>& code) : code_(code) {
         build_instruction_stream();
         if constexpr (DecodeTime == COMPILE_TIME) {
             build_label_table();
         }
     }
-}
+} // namespace ngu::pvm
 
-#endif //NGU_PVM_BYTECODE_BYTECODE_DECODER_H
+#endif // NGU_PVM_BYTECODE_BYTECODE_DECODER_H

@@ -30,14 +30,14 @@ using namespace ngu::pvm;
 class VirtualMachineBenchmark : public benchmark::Fixture {
 protected:
     static constexpr auto arch = architecture::make(1);
-    static constexpr auto cr   = assembler(arch);
+    static constexpr auto cr = assembler(arch);
 };
 
 BENCHMARK_F(VirtualMachineBenchmark, XteaDecrypt_Native)(benchmark::State& state) {
-    static constexpr std::uint32_t KEY[4]   = { 0x00112233, 0x44556677, 0x8899AABB, 0xCCDDEEFF };
+    static constexpr std::uint32_t KEY[4] = {0x00112233, 0x44556677, 0x8899AABB, 0xCCDDEEFF};
     static constexpr std::uint32_t PLAIN_V0 = 0x01234567;
     static constexpr std::uint32_t PLAIN_V1 = 0x89ABCDEF;
-    static constexpr auto          cipher   = crypto::xtea_encrypt(PLAIN_V0, PLAIN_V1, KEY);
+    static constexpr auto cipher = crypto::xtea_encrypt(PLAIN_V0, PLAIN_V1, KEY);
 
     for (auto _ : state) {
         auto [v0, v1] = crypto::xtea_decrypt(cipher.first, cipher.second, KEY);
@@ -47,24 +47,25 @@ BENCHMARK_F(VirtualMachineBenchmark, XteaDecrypt_Native)(benchmark::State& state
 }
 
 BENCHMARK_F(VirtualMachineBenchmark, XteaDecrypt_VM)(benchmark::State& state) {
-    static constexpr std::uint32_t KEY[4]   = { 0x00112233, 0x44556677, 0x8899AABB, 0xCCDDEEFF };
+    static constexpr std::uint32_t KEY[4] = {0x00112233, 0x44556677, 0x8899AABB, 0xCCDDEEFF};
     static constexpr std::uint32_t PLAIN_V0 = 0x01234567;
     static constexpr std::uint32_t PLAIN_V1 = 0x89ABCDEF;
-    static constexpr auto          cipher   = crypto::xtea_encrypt(PLAIN_V0, PLAIN_V1, KEY);
+    static constexpr auto cipher = crypto::xtea_encrypt(PLAIN_V0, PLAIN_V1, KEY);
 
-    static constexpr std::uint64_t LOOP_START   = 1;
+    static constexpr std::uint64_t LOOP_START = 1;
     static constexpr std::uint64_t SWITCH1_KEY1 = 2;
     static constexpr std::uint64_t SWITCH1_KEY2 = 3;
     static constexpr std::uint64_t SWITCH1_KEY3 = 4;
-    static constexpr std::uint64_t SWITCH1_END  = 5;
+    static constexpr std::uint64_t SWITCH1_END = 5;
     static constexpr std::uint64_t SWITCH2_KEY1 = 6;
     static constexpr std::uint64_t SWITCH2_KEY2 = 7;
     static constexpr std::uint64_t SWITCH2_KEY3 = 8;
-    static constexpr std::uint64_t SWITCH2_END  = 9;
+    static constexpr std::uint64_t SWITCH2_END = 9;
 
     // R1=v0(cipher), R2=v1(cipher), R3=sum, R4=delta, R5=rounds_counter
     // R6/R7/R8 = scratch
-    static constexpr auto code = PVM_ASSEMBLE(arch,
+    static constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(cipher.first)),
         cr.MOV(arch::reg::REG_R2, operand(cipher.second)),
         cr.MOV(arch::reg::REG_R3, operand(crypto::SUM_INIT)),
@@ -166,14 +167,14 @@ BENCHMARK_F(VirtualMachineBenchmark, XteaDecrypt_VM)(benchmark::State& state) {
 }
 
 BENCHMARK_F(VirtualMachineBenchmark, Rc4KeystreamXor_Native)(benchmark::State& state) {
-    static constexpr std::uint8_t KEY[]          = { 'K', 'e', 'y' };
-    static constexpr std::size_t  KETLEN         = sizeof KEY;
+    static constexpr std::uint8_t KEY[] = {'K', 'e', 'y'};
+    static constexpr std::size_t KETLEN = sizeof KEY;
     static constexpr std::uint8_t PLAINTEXT_BYTE = 'P';
 
     for (auto _ : state) {
-        constexpr auto keystream  = crypto::rc4_keystream_byte(KEY, KETLEN);
-        std::uint8_t   cipher     = PLAINTEXT_BYTE ^ keystream;
-        std::uint8_t   decrypted  = cipher ^ keystream;
+        constexpr auto keystream = crypto::rc4_keystream_byte(KEY, KETLEN);
+        std::uint8_t cipher = PLAINTEXT_BYTE ^ keystream;
+        std::uint8_t decrypted = cipher ^ keystream;
         benchmark::DoNotOptimize(cipher);
         benchmark::DoNotOptimize(decrypted);
         benchmark::ClobberMemory();
@@ -181,12 +182,13 @@ BENCHMARK_F(VirtualMachineBenchmark, Rc4KeystreamXor_Native)(benchmark::State& s
 }
 
 BENCHMARK_F(VirtualMachineBenchmark, Rc4KeystreamXor_VM)(benchmark::State& state) {
-    static constexpr std::uint8_t KEY[]              = { 'K', 'e', 'y' };
-    static constexpr std::size_t  KETLEN             = sizeof KEY;
-    static constexpr std::uint8_t PLAINTEXT_BYTE     = 'P';
+    static constexpr std::uint8_t KEY[] = {'K', 'e', 'y'};
+    static constexpr std::size_t KETLEN = sizeof KEY;
+    static constexpr std::uint8_t PLAINTEXT_BYTE = 'P';
     static constexpr std::uint8_t EXPECTED_KEYSTREAM = crypto::rc4_keystream_byte(KEY, KETLEN);
 
-    static constexpr auto code = PVM_ASSEMBLE(arch,
+    static constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(static_cast<std::uint64_t>(PLAINTEXT_BYTE))),
         cr.MOV(arch::reg::REG_R2, operand(static_cast<std::uint64_t>(EXPECTED_KEYSTREAM))),
 
@@ -229,7 +231,10 @@ BENCHMARK_F(VirtualMachineBenchmark, ChaCha20QuarterRound_Native)(benchmark::Sta
         benchmark::DoNotOptimize(b);
         benchmark::DoNotOptimize(c);
         benchmark::DoNotOptimize(d);
-        a = INPUT_A; b = INPUT_B; c = INPUT_C; d = INPUT_D;
+        a = INPUT_A;
+        b = INPUT_B;
+        c = INPUT_C;
+        d = INPUT_D;
     }
 }
 
@@ -240,7 +245,8 @@ BENCHMARK_F(VirtualMachineBenchmark, ChaCha20QuarterRound_VM)(benchmark::State& 
     static constexpr std::uint32_t INPUT_D = 0x01234567u;
 
     // R1=a, R2=b, R3=c, R4=d, R5/R6=scratch for rotl32
-    static constexpr auto code = PVM_ASSEMBLE(arch,
+    static constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(INPUT_A)),
         cr.MOV(arch::reg::REG_R2, operand(INPUT_B)),
         cr.MOV(arch::reg::REG_R3, operand(INPUT_C)),
@@ -311,4 +317,4 @@ BENCHMARK_F(VirtualMachineBenchmark, ChaCha20QuarterRound_VM)(benchmark::State& 
     }
 }
 
-#endif //NGU_PVM_TESTS_BENCHMARK_H
+#endif // NGU_PVM_TESTS_BENCHMARK_H

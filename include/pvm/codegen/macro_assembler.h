@@ -33,64 +33,48 @@ namespace ngu::pvm {
      * @par Macro groups
      * Arithmetic:        @c ZERO, @c NEG, @c MOV64, @c MUL_POW2, @c DIV_POW2, @c MUL3, @c MUL5. @n
      * Comparison/flow:   @c ABS, @c MIN, @c MAX, @c LOOP. @n
-     * Bit manipulation:  @c MASK_LO, @c CLEAR_LO, @c EXTRACT_BYTE, @c INSERT_BYTE, @c ROT16, @c BSWAP32, @c TEST_BIT. @n
-     * 64-bit ops:        @c INC64, @c ADD64. @n
-     * Crypto primitives: @c ARX, @c XR, @c AX, @c XS (ChaCha/Salsa-style operations). @n
-     * Utilities:         @c MOVC, @c SWAP, @c ALIGN_UP.
+     * Bit manipulation:  @c MASK_LO, @c CLEAR_LO, @c EXTRACT_BYTE, @c INSERT_BYTE, @c ROT16, @c
+     * BSWAP32, @c TEST_BIT.
+     * @n 64-bit ops:        @c INC64, @c ADD64. @n Crypto primitives: @c ARX, @c XR, @c AX, @c XS
+     * (ChaCha/Salsa-style operations). @n Utilities:         @c MOVC, @c SWAP, @c ALIGN_UP.
      */
     class macro_assembler : public assembler {
     public:
-        consteval explicit macro_assembler(const architecture& arch)
-            : assembler(arch) {}
+        consteval explicit macro_assembler(const architecture& arch) : assembler(arch) {
+        }
 
         // dst = 0
         consteval auto ZERO(const arch::reg dst) const {
-            return detail::insn_seq{
-                XOR(dst, operand(dst))
-            };
+            return detail::insn_seq{XOR(dst, operand(dst))};
         }
 
         // dst = -dst (two's complement)
         consteval auto NEG(const arch::reg dst) const {
-            return detail::insn_seq{
-                NOT(dst),
-                ADD(dst, operand(1u))
-            };
+            return detail::insn_seq{NOT(dst), ADD(dst, operand(1u))};
         }
 
         // dst = src (via xor+or)
         consteval auto MOVC(const arch::reg dst, const arch::reg src) const {
-            return detail::insn_seq{
-                XOR(dst, operand(dst)),
-                OR(dst, operand(src))
-            };
+            return detail::insn_seq{XOR(dst, operand(dst)), OR(dst, operand(src))};
         }
 
         // dst = (hi << 32) | lo
         consteval auto MOV64(const arch::reg dst, std::uint32_t hi, std::uint32_t lo) const {
-            return detail::insn_seq{
-                MOV(dst, operand(hi)),
-                SHL(dst, operand(32u)),
-                OR(dst, operand(lo))
-            };
+            return detail::insn_seq{MOV(dst, operand(hi)), SHL(dst, operand(32u)), OR(dst, operand(lo))};
         }
 
         // swap a, b without temp
         consteval auto SWAP(const arch::reg a, const arch::reg b) const {
-            return detail::insn_seq{
-                XOR(a, operand(b)),
-                XOR(b, operand(a)),
-                XOR(a, operand(b))
-            };
+            return detail::insn_seq{XOR(a, operand(b)), XOR(b, operand(a)), XOR(a, operand(b))};
         }
 
         // dst = |dst| (signed). scratch is clobbered.
         consteval auto ABS(const arch::reg dst, const arch::reg scratch, std::uint32_t label_id) const {
             return detail::insn_seq{
                 MOV(scratch, operand(dst)),
-                SHR(scratch, operand(63u)),     // scratch = 1 if negative, 0 if positive/zero
+                SHR(scratch, operand(63u)), // scratch = 1 if negative, 0 if positive/zero
                 CMP(scratch, operand(0u)),
-                JEL(label_id),                        // if positive/zero, skip negation
+                JEL(label_id),              // if positive/zero, skip negation
                 NOT(dst),
                 ADD(dst, operand(1u)),
                 LABEL(label_id)
@@ -98,89 +82,76 @@ namespace ngu::pvm {
         }
 
         // a = min(a, b) unsigned. scratch is clobbered.
-        consteval auto MIN(const arch::reg a, const arch::reg b, const arch::reg scratch, std::uint32_t label_id) const {
+        consteval auto MIN(const arch::reg a, const arch::reg b, const arch::reg scratch, std::uint32_t label_id)
+            const {
             return detail::insn_seq{
-                CMP(a, operand(b)),                                 // bit0=EQ, bit1=LT(a<b unsigned)
-                JEL(label_id),                                          // if a == b, keep a
-                MOV(scratch, operand(arch::reg::REG_FLAGS)),      // save flags before they're clobbered
-                AND(scratch, operand(2u)),                        // isolate LT bit
+                CMP(a, operand(b)),                          // bit0=EQ, bit1=LT(a<b unsigned)
+                JEL(label_id),                               // if a == b, keep a
+                MOV(scratch, operand(arch::reg::REG_FLAGS)), // save flags before they're clobbered
+                AND(scratch, operand(2u)),                   // isolate LT bit
                 CMP(scratch, operand(0u)),
-                JNEL(label_id),                                         // if LT was set (a < b), keep a
-                MOV(a, operand(b)),                                 // a > b, so a = b
+                JNEL(label_id),                              // if LT was set (a < b), keep a
+                MOV(a, operand(b)),                          // a > b, so a = b
                 LABEL(label_id)
             };
         }
 
         // a = max(a, b) unsigned. scratch is clobbered.
-        consteval auto MAX(const arch::reg a, const arch::reg b, const arch::reg scratch, std::uint32_t label_id) const {
+        consteval auto MAX(const arch::reg a, const arch::reg b, const arch::reg scratch, std::uint32_t label_id)
+            const {
             return detail::insn_seq{
-                CMP(a, operand(b)),                                 // bit0=EQ, bit1=LT(a<b unsigned)
-                JEL(label_id),                                          // if a == b, keep a
-                MOV(scratch, operand(arch::reg::REG_FLAGS)),      // save flags before they're clobbered
-                AND(scratch, operand(2u)),                        // isolate LT bit
+                CMP(a, operand(b)),                          // bit0=EQ, bit1=LT(a<b unsigned)
+                JEL(label_id),                               // if a == b, keep a
+                MOV(scratch, operand(arch::reg::REG_FLAGS)), // save flags before they're clobbered
+                AND(scratch, operand(2u)),                   // isolate LT bit
                 CMP(scratch, operand(0u)),
-                JEL(label_id),                                          // if LT was not set (a > b), keep a
-                MOV(a, operand(b)),                                 // a < b, so a = b
+                JEL(label_id),                               // if LT was not set (a > b), keep a
+                MOV(a, operand(b)),                          // a < b, so a = b
                 LABEL(label_id)
             };
         }
 
         // dst *= 2^n
         consteval auto MUL_POW2(const arch::reg dst, std::uint8_t n) const {
-            return detail::insn_seq{
-                SHL(dst, operand(n))
-            };
+            return detail::insn_seq{SHL(dst, operand(n))};
         }
 
         // dst /= 2^n (unsigned)
         consteval auto DIV_POW2(const arch::reg dst, std::uint8_t n) const {
-            return detail::insn_seq{
-                SHR(dst, operand(n))
-            };
+            return detail::insn_seq{SHR(dst, operand(n))};
         }
 
         // dst *= 3
         consteval auto MUL3(const arch::reg dst, const arch::reg scratch) const {
-            return detail::insn_seq{
-                MOV(scratch, operand(dst)),
-                SHL(scratch, operand(1u)),
-                ADD(dst, operand(scratch))
-            };
+            return detail::insn_seq{MOV(scratch, operand(dst)), SHL(scratch, operand(1u)), ADD(dst, operand(scratch))};
         }
 
         // dst *= 5
         consteval auto MUL5(const arch::reg dst, const arch::reg scratch) const {
-            return detail::insn_seq{
-                MOV(scratch, operand(dst)),
-                SHL(scratch, operand(2u)),
-                ADD(dst, operand(scratch))
-            };
+            return detail::insn_seq{MOV(scratch, operand(dst)), SHL(scratch, operand(2u)), ADD(dst, operand(scratch))};
         }
 
         // dst = (dst + align-1) & ~(align-1), align must be power of 2
         consteval auto ALIGN_UP(const arch::reg dst, std::uint32_t align) const {
-            return detail::insn_seq{
-                ADD(dst, operand(align - 1)),
-                AND(dst, operand(~(align - 1)))
-            };
+            return detail::insn_seq{ADD(dst, operand(align - 1)), AND(dst, operand(~(align - 1)))};
         }
 
         // (lo, hi) += 1 with carry
-        consteval auto INC64(const arch::reg lo, const arch::reg hi,
-                             std::uint32_t label_id) const {
+        consteval auto INC64(const arch::reg lo, const arch::reg hi, std::uint32_t label_id) const {
             return detail::insn_seq{
-                ADD(lo, operand(1u)),
-                CMP(lo, operand(0u)),
-                JNEL(label_id),
-                ADD(hi, operand(1u)),
-                LABEL(label_id)
+                ADD(lo, operand(1u)), CMP(lo, operand(0u)), JNEL(label_id), ADD(hi, operand(1u)), LABEL(label_id)
             };
         }
 
         // (dst_lo, dst_hi) += (src_lo, src_hi) with carry
-        consteval auto ADD64(const arch::reg dst_lo, const arch::reg dst_hi,
-                             const arch::reg src_lo, const arch::reg src_hi,
-                             const arch::reg tmp, std::uint32_t label_id) const {
+        consteval auto ADD64(
+            const arch::reg dst_lo,
+            const arch::reg dst_hi,
+            const arch::reg src_lo,
+            const arch::reg src_hi,
+            const arch::reg tmp,
+            std::uint32_t label_id
+        ) const {
             return detail::insn_seq{
                 MOV(tmp, operand(dst_lo)),
                 ADD(dst_lo, operand(src_lo)),
@@ -204,16 +175,12 @@ namespace ngu::pvm {
 
         // dst &= (1 << n) - 1
         consteval auto MASK_LO(const arch::reg dst, std::uint8_t n) const {
-            return detail::insn_seq{
-                AND(dst, operand((1ull << n) - 1))
-            };
+            return detail::insn_seq{AND(dst, operand((1ull << n) - 1))};
         }
 
         // dst &= ~((1 << n) - 1)
         consteval auto CLEAR_LO(const arch::reg dst, std::uint8_t n) const {
-            return detail::insn_seq{
-                AND(dst, operand(~((1ull << n) - 1)))
-            };
+            return detail::insn_seq{AND(dst, operand(~((1ull << n) - 1)))};
         }
 
         // scratch = (src >> idx*8) & 0xFF
@@ -236,9 +203,7 @@ namespace ngu::pvm {
 
         // dst = swap upper/lower 16 bits
         consteval auto ROT16(const arch::reg dst) const {
-            return detail::insn_seq{
-                ROL(dst, operand(16u))
-            };
+            return detail::insn_seq{ROL(dst, operand(16u))};
         }
 
         // dst = byte-reverse dst
@@ -264,34 +229,24 @@ namespace ngu::pvm {
         }
 
         // a += b; c ^= a; c <<<= n
-        consteval auto ARX(const arch::reg a, const arch::reg b,
-                           const arch::reg c, std::uint8_t rot) const {
-            return detail::insn_seq{
-                ADD(a, operand(b)),
-                XOR(c, operand(a)),
-                ROL(c, operand(rot))
-            };
+        consteval auto ARX(const arch::reg a, const arch::reg b, const arch::reg c, std::uint8_t rot) const {
+            return detail::insn_seq{ADD(a, operand(b)), XOR(c, operand(a)), ROL(c, operand(rot))};
         }
 
         // a ^= b; a <<<= n
         consteval auto XR(const arch::reg a, const arch::reg b, std::uint8_t rot) const {
-            return detail::insn_seq{
-                XOR(a, operand(b)),
-                ROL(a, operand(rot))
-            };
+            return detail::insn_seq{XOR(a, operand(b)), ROL(a, operand(rot))};
         }
 
         // a += b; c ^= a
         consteval auto AX(const arch::reg a, const arch::reg b, const arch::reg c) const {
-            return detail::insn_seq{
-                ADD(a, operand(b)),
-                XOR(c, operand(a))
-            };
+            return detail::insn_seq{ADD(a, operand(b)), XOR(c, operand(a))};
         }
 
         // scratch = (v << left) ^ (v >> right)
-        consteval auto XS(const arch::reg v, const arch::reg scratch,
-                          const arch::reg tmp, std::uint8_t left, std::uint8_t right) const {
+        consteval auto XS(
+            const arch::reg v, const arch::reg scratch, const arch::reg tmp, std::uint8_t left, std::uint8_t right
+        ) const {
             return detail::insn_seq{
                 MOV(scratch, operand(v)),
                 SHL(scratch, operand(left)),
@@ -303,13 +258,9 @@ namespace ngu::pvm {
 
         // counter -= 1; jump to body_label if counter != 0
         consteval auto LOOP(const arch::reg counter, std::uint32_t body_label) const {
-            return detail::insn_seq{
-                SUB(counter, operand(1u)),
-                CMP(counter, operand(0u)),
-                JNEL(body_label)
-            };
+            return detail::insn_seq{SUB(counter, operand(1u)), CMP(counter, operand(0u)), JNEL(body_label)};
         }
     };
-}
+} // namespace ngu::pvm
 
-#endif //NGU_PVM_CODEGEN_MACRO_ASSEMBLER_H
+#endif // NGU_PVM_CODEGEN_MACRO_ASSEMBLER_H

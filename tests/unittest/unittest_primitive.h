@@ -33,10 +33,7 @@ TEST_F(VirtualMachineTest, Initialization) {
 }
 
 TEST_F(VirtualMachineTest, MovImmediate) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(42u)),
-        cr.HALT()
-    );
+    constexpr auto code = PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(42u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -45,7 +42,8 @@ TEST_F(VirtualMachineTest, MovImmediate) {
 }
 
 TEST_F(VirtualMachineTest, MovRegister) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0xBEEFu)),
         cr.MOV(arch::reg::REG_R2, operand(arch::reg::REG_R1)),
         cr.HALT()
@@ -59,10 +57,8 @@ TEST_F(VirtualMachineTest, MovRegister) {
 }
 
 TEST_F(VirtualMachineTest, BoundaryValues) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(0u)),
-        cr.MOV(arch::reg::REG_R2, operand(UINT64_MAX)),
-        cr.HALT()
+    constexpr auto code = PVM_ASSEMBLE(
+        arch, cr.MOV(arch::reg::REG_R1, operand(0u)), cr.MOV(arch::reg::REG_R2, operand(UINT64_MAX)), cr.HALT()
     );
 
     auto test_vm = interpreter(arch);
@@ -73,7 +69,8 @@ TEST_F(VirtualMachineTest, BoundaryValues) {
 }
 
 TEST_F(VirtualMachineTest, AllRegistersIndependent) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(1u)),
         cr.MOV(arch::reg::REG_R2, operand(2u)),
         cr.MOV(arch::reg::REG_R3, operand(3u)),
@@ -99,11 +96,8 @@ TEST_F(VirtualMachineTest, AllRegistersIndependent) {
 }
 
 TEST_F(VirtualMachineTest, AddImmediate) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(10u)),
-        cr.ADD(arch::reg::REG_R1, operand(5u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(10u)), cr.ADD(arch::reg::REG_R1, operand(5u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -112,7 +106,8 @@ TEST_F(VirtualMachineTest, AddImmediate) {
 }
 
 TEST_F(VirtualMachineTest, AddRegister) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(10u)),
         cr.MOV(arch::reg::REG_R2, operand(5u)),
         cr.ADD(arch::reg::REG_R1, operand(arch::reg::REG_R2)),
@@ -127,10 +122,8 @@ TEST_F(VirtualMachineTest, AddRegister) {
 }
 
 TEST_F(VirtualMachineTest, AddOverflow) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(UINT64_MAX - 5)),
-        cr.ADD(arch::reg::REG_R1, operand(10u)),
-        cr.HALT()
+    constexpr auto code = PVM_ASSEMBLE(
+        arch, cr.MOV(arch::reg::REG_R1, operand(UINT64_MAX - 5)), cr.ADD(arch::reg::REG_R1, operand(10u)), cr.HALT()
     );
 
     auto test_vm = interpreter(arch);
@@ -140,11 +133,8 @@ TEST_F(VirtualMachineTest, AddOverflow) {
 }
 
 TEST_F(VirtualMachineTest, SubImmediate) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(20u)),
-        cr.SUB(arch::reg::REG_R1, operand(7u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(20u)), cr.SUB(arch::reg::REG_R1, operand(7u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -153,7 +143,8 @@ TEST_F(VirtualMachineTest, SubImmediate) {
 }
 
 TEST_F(VirtualMachineTest, SubRegister) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(20u)),
         cr.MOV(arch::reg::REG_R2, operand(7u)),
         cr.SUB(arch::reg::REG_R1, operand(arch::reg::REG_R2)),
@@ -168,11 +159,8 @@ TEST_F(VirtualMachineTest, SubRegister) {
 }
 
 TEST_F(VirtualMachineTest, SubUnderflow) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(5u)),
-        cr.SUB(arch::reg::REG_R1, operand(10u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(5u)), cr.SUB(arch::reg::REG_R1, operand(10u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -181,7 +169,8 @@ TEST_F(VirtualMachineTest, SubUnderflow) {
 }
 
 TEST_F(VirtualMachineTest, AndImmediate) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0b11110000u)),
         cr.AND(arch::reg::REG_R1, operand(0b10101010u)),
         cr.HALT()
@@ -194,7 +183,8 @@ TEST_F(VirtualMachineTest, AndImmediate) {
 }
 
 TEST_F(VirtualMachineTest, AndRegister) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0xFFu)),
         cr.MOV(arch::reg::REG_R2, operand(0x0Fu)),
         cr.AND(arch::reg::REG_R1, operand(arch::reg::REG_R2)),
@@ -209,10 +199,8 @@ TEST_F(VirtualMachineTest, AndRegister) {
 }
 
 TEST_F(VirtualMachineTest, OrImmediate) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(0b11110000u)),
-        cr.OR(arch::reg::REG_R1, operand(0b10101010u)),
-        cr.HALT()
+    constexpr auto code = PVM_ASSEMBLE(
+        arch, cr.MOV(arch::reg::REG_R1, operand(0b11110000u)), cr.OR(arch::reg::REG_R1, operand(0b10101010u)), cr.HALT()
     );
 
     auto test_vm = interpreter(arch);
@@ -222,7 +210,8 @@ TEST_F(VirtualMachineTest, OrImmediate) {
 }
 
 TEST_F(VirtualMachineTest, OrRegister) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0b11110000u)),
         cr.MOV(arch::reg::REG_R2, operand(0b00001111u)),
         cr.OR(arch::reg::REG_R1, operand(arch::reg::REG_R2)),
@@ -237,7 +226,8 @@ TEST_F(VirtualMachineTest, OrRegister) {
 }
 
 TEST_F(VirtualMachineTest, XorImmediate) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0b11110000u)),
         cr.XOR(arch::reg::REG_R1, operand(0b10101010u)),
         cr.HALT()
@@ -250,7 +240,8 @@ TEST_F(VirtualMachineTest, XorImmediate) {
 }
 
 TEST_F(VirtualMachineTest, XorRegister) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0b11001100u)),
         cr.MOV(arch::reg::REG_R2, operand(0b10101010u)),
         cr.XOR(arch::reg::REG_R1, operand(arch::reg::REG_R2)),
@@ -265,7 +256,8 @@ TEST_F(VirtualMachineTest, XorRegister) {
 }
 
 TEST_F(VirtualMachineTest, XorSelf) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0xFFu)),
         cr.XOR(arch::reg::REG_R1, operand(arch::reg::REG_R1)),
         cr.HALT()
@@ -278,11 +270,8 @@ TEST_F(VirtualMachineTest, XorSelf) {
 }
 
 TEST_F(VirtualMachineTest, NotImmediate) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(0b10101010u)),
-        cr.NOT(arch::reg::REG_R1),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(0b10101010u)), cr.NOT(arch::reg::REG_R1), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -291,11 +280,8 @@ TEST_F(VirtualMachineTest, NotImmediate) {
 }
 
 TEST_F(VirtualMachineTest, NotZero) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(0u)),
-        cr.NOT(arch::reg::REG_R1),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(0u)), cr.NOT(arch::reg::REG_R1), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -304,11 +290,8 @@ TEST_F(VirtualMachineTest, NotZero) {
 }
 
 TEST_F(VirtualMachineTest, ShiftLeft) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(5u)),
-        cr.SHL(arch::reg::REG_R1, operand(2u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(5u)), cr.SHL(arch::reg::REG_R1, operand(2u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -317,11 +300,8 @@ TEST_F(VirtualMachineTest, ShiftLeft) {
 }
 
 TEST_F(VirtualMachineTest, ShiftLeftOverflow) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(1u)),
-        cr.SHL(arch::reg::REG_R1, operand(63u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(1u)), cr.SHL(arch::reg::REG_R1, operand(63u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -330,11 +310,8 @@ TEST_F(VirtualMachineTest, ShiftLeftOverflow) {
 }
 
 TEST_F(VirtualMachineTest, ShiftRight) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(20u)),
-        cr.SHR(arch::reg::REG_R1, operand(2u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(20u)), cr.SHR(arch::reg::REG_R1, operand(2u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -343,7 +320,8 @@ TEST_F(VirtualMachineTest, ShiftRight) {
 }
 
 TEST_F(VirtualMachineTest, ShiftRightBoundary) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0x8000000000000000ULL)),
         cr.SHR(arch::reg::REG_R1, operand(63u)),
         cr.HALT()
@@ -356,7 +334,8 @@ TEST_F(VirtualMachineTest, ShiftRightBoundary) {
 }
 
 TEST_F(VirtualMachineTest, RotateLeft) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0x8000000000000001ULL)),
         cr.ROL(arch::reg::REG_R1, operand(1u)),
         cr.HALT()
@@ -369,7 +348,8 @@ TEST_F(VirtualMachineTest, RotateLeft) {
 }
 
 TEST_F(VirtualMachineTest, RotateRight) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0x8000000000000001ULL)),
         cr.ROR(arch::reg::REG_R1, operand(1u)),
         cr.HALT()
@@ -382,11 +362,8 @@ TEST_F(VirtualMachineTest, RotateRight) {
 }
 
 TEST_F(VirtualMachineTest, CompareEqual) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(42u)),
-        cr.CMP(arch::reg::REG_R1, operand(42u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(42u)), cr.CMP(arch::reg::REG_R1, operand(42u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -397,11 +374,8 @@ TEST_F(VirtualMachineTest, CompareEqual) {
 }
 
 TEST_F(VirtualMachineTest, CompareNotEqual) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(42u)),
-        cr.CMP(arch::reg::REG_R1, operand(24u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(42u)), cr.CMP(arch::reg::REG_R1, operand(24u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -410,11 +384,8 @@ TEST_F(VirtualMachineTest, CompareNotEqual) {
 }
 
 TEST_F(VirtualMachineTest, CompareLess) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(10u)),
-        cr.CMP(arch::reg::REG_R1, operand(20u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(10u)), cr.CMP(arch::reg::REG_R1, operand(20u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -426,11 +397,8 @@ TEST_F(VirtualMachineTest, CompareLess) {
 }
 
 TEST_F(VirtualMachineTest, CompareGreater) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(20u)),
-        cr.CMP(arch::reg::REG_R1, operand(10u)),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(20u)), cr.CMP(arch::reg::REG_R1, operand(10u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -441,7 +409,8 @@ TEST_F(VirtualMachineTest, CompareGreater) {
 }
 
 TEST_F(VirtualMachineTest, JumpUnconditional) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(10u)),
         cr.JMPL(1),
         cr.MOV(arch::reg::REG_R2, operand(99u)),
@@ -457,7 +426,8 @@ TEST_F(VirtualMachineTest, JumpUnconditional) {
 }
 
 TEST_F(VirtualMachineTest, JumpIndexedUnconditional) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(10u)),
         cr.MOV(arch::reg::REG_R2, operand(10u)),
         cr.JMPI(operand(18u)),
@@ -487,7 +457,8 @@ TEST_F(VirtualMachineTest, JumpIndexedUnconditional) {
 }
 
 TEST_F(VirtualMachineTest, JumpLabel) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R2, operand(100u)),
         cr.JMPL(1),
         cr.MOV(arch::reg::REG_R2, operand(101u)),
@@ -509,7 +480,8 @@ TEST_F(VirtualMachineTest, JumpLabel) {
 }
 
 TEST_F(VirtualMachineTest, JumpIfEqualTaken) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(5u)),
         cr.CMP(arch::reg::REG_R1, operand(5u)),
         cr.JEL(1),
@@ -525,7 +497,8 @@ TEST_F(VirtualMachineTest, JumpIfEqualTaken) {
 }
 
 TEST_F(VirtualMachineTest, JumpIfEqualNotTaken) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(5u)),
         cr.CMP(arch::reg::REG_R1, operand(10u)),
         cr.JEL(1),
@@ -541,7 +514,8 @@ TEST_F(VirtualMachineTest, JumpIfEqualNotTaken) {
 }
 
 TEST_F(VirtualMachineTest, JumpIfNotEqualTaken) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(5u)),
         cr.CMP(arch::reg::REG_R1, operand(10u)),
         cr.JNEL(1),
@@ -557,7 +531,8 @@ TEST_F(VirtualMachineTest, JumpIfNotEqualTaken) {
 }
 
 TEST_F(VirtualMachineTest, JumpIfNotEqualNotTaken) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(5u)),
         cr.CMP(arch::reg::REG_R1, operand(5u)),
         cr.JNEL(1),
@@ -573,13 +548,8 @@ TEST_F(VirtualMachineTest, JumpIfNotEqualNotTaken) {
 }
 
 TEST_F(VirtualMachineTest, NopInstruction) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(42u)),
-        cr.NOP(),
-        cr.NOP(),
-        cr.NOP(),
-        cr.HALT()
-    );
+    constexpr auto code =
+        PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(42u)), cr.NOP(), cr.NOP(), cr.NOP(), cr.HALT());
 
     auto test_vm = interpreter(arch);
     ASSERT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
@@ -588,17 +558,15 @@ TEST_F(VirtualMachineTest, NopInstruction) {
 }
 
 TEST_F(VirtualMachineTest, HaltStatus) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
-        cr.MOV(arch::reg::REG_R1, operand(1u)),
-        cr.HALT()
-    );
+    constexpr auto code = PVM_ASSEMBLE(arch, cr.MOV(arch::reg::REG_R1, operand(1u)), cr.HALT());
 
     auto test_vm = interpreter(arch);
     EXPECT_EQ(test_vm.run(code), interpreter::status::VM_SUCCESS);
 }
 
 TEST_F(VirtualMachineTest, ArithmeticChain) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(100u)),
         cr.ADD(arch::reg::REG_R1, operand(50u)),
         cr.SUB(arch::reg::REG_R1, operand(25u)),
@@ -614,7 +582,8 @@ TEST_F(VirtualMachineTest, ArithmeticChain) {
 
 TEST_F(VirtualMachineTest, LogicalChain) {
     // 0xFF & 0xF0 = 0xF0, | 0x0A = 0xFA, ^ 0x55 = 0xAF
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0xFFu)),
         cr.AND(arch::reg::REG_R1, operand(0xF0u)),
         cr.OR(arch::reg::REG_R1, operand(0x0Au)),
@@ -629,7 +598,8 @@ TEST_F(VirtualMachineTest, LogicalChain) {
 }
 
 TEST_F(VirtualMachineTest, RegisterToRegisterOperations) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(10u)),
         cr.MOV(arch::reg::REG_R2, operand(20u)),
         cr.MOV(arch::reg::REG_R3, operand(arch::reg::REG_R1)),
@@ -646,7 +616,8 @@ TEST_F(VirtualMachineTest, RegisterToRegisterOperations) {
 }
 
 TEST_F(VirtualMachineTest, MultiRegisterOperations) {
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(1u)),
         cr.MOV(arch::reg::REG_R2, operand(2u)),
         cr.MOV(arch::reg::REG_R3, operand(3u)),
@@ -665,7 +636,8 @@ TEST_F(VirtualMachineTest, MultiRegisterOperations) {
 
 TEST_F(VirtualMachineTest, BitwiseCombo) {
     // (0b11001100 & 0b10101010) = 0b10001000; | 0b01010101 = 0b11011101
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(0b11001100u)),
         cr.MOV(arch::reg::REG_R2, operand(0b10101010u)),
         cr.AND(arch::reg::REG_R1, operand(arch::reg::REG_R2)),
@@ -682,7 +654,8 @@ TEST_F(VirtualMachineTest, BitwiseCombo) {
 
 TEST_F(VirtualMachineTest, ShiftChain) {
     // 1 << 4 = 16, << 2 = 64, >> 3 = 8
-    constexpr auto code = PVM_ASSEMBLE(arch,
+    constexpr auto code = PVM_ASSEMBLE(
+        arch,
         cr.MOV(arch::reg::REG_R1, operand(1u)),
         cr.SHL(arch::reg::REG_R1, operand(4u)),
         cr.SHL(arch::reg::REG_R1, operand(2u)),
@@ -696,4 +669,4 @@ TEST_F(VirtualMachineTest, ShiftChain) {
     EXPECT_EQ(test_vm.get_ctx()->get_reg(arch::reg::REG_R1), 8u);
 }
 
-#endif //NGU_PVM_TESTS_UNITTEST_PRIMITIVE_H
+#endif // NGU_PVM_TESTS_UNITTEST_PRIMITIVE_H

@@ -25,13 +25,15 @@
 
 namespace ngu::pvm {
     namespace detail {
-        /// @brief Returns the number of instructions in type T (1 for a single instruction, T::count for macro-instructions).
-        template <typename T> consteval std::size_t instruction_count() {
+        /// @brief Returns the number of instructions in type T (1 for a single instruction,
+        /// T::count for macro-instructions).
+        template<typename T> consteval std::size_t instruction_count() {
             using U = std::remove_cvref_t<T>;
-            if constexpr (requires { U::count; })
+            if constexpr (requires { U::count; }) {
                 return U::count;
-            else
+            } else {
                 return 1;
+            }
         }
 
         /// @brief Shrinks the bytecode to its actual size, removing the unused tail of the buffer.
@@ -40,13 +42,15 @@ namespace ngu::pvm {
             constexpr std::size_t exact = big.length > 0 ? big.length : 1;
 
             std::uint8_t arr[exact]{};
-            for (std::size_t i{}; i < big.length; ++i)
+            for (std::size_t i{}; i < big.length; ++i) {
                 arr[i] = big.bytes[i];
-            return bytecode<exact>{ arr, big.length };
+            }
+            return bytecode<exact>{arr, big.length};
         }
 
-        /// @brief First assembly pass: encodes instructions into bytecode with meta-opcodes and labels left unresolved.
-        template<typename ... Instructions> consteval auto intermediate_assemble(Instructions&&... insns) {
+        /// @brief First assembly pass: encodes instructions into bytecode with meta-opcodes and
+        /// labels left unresolved.
+        template<typename... Instructions> consteval auto intermediate_assemble(Instructions&&... insns) {
             constexpr std::size_t count = (instruction_count<Instructions>() + ...);
             constexpr std::size_t max_size = count * 12;
 
@@ -56,8 +60,9 @@ namespace ngu::pvm {
             auto add = [&](auto&& arg) {
                 using U = std::remove_cvref_t<decltype(arg)>;
                 if constexpr (requires { U::count; }) {
-                    for (std::size_t i{}; i < U::count; ++i)
+                    for (std::size_t i{}; i < U::count; ++i) {
                         arr[idx++] = arg.data[i];
+                    }
                 } else {
                     arr[idx++] = static_cast<insn_data>(arg);
                 }
@@ -74,28 +79,30 @@ namespace ngu::pvm {
                 auto imm_size = get_imm_size(insn.insn_sz);
                 auto hdr_size = total_size - imm_size;
 
-                for (std::size_t j = 0; j < hdr_size; ++j)
+                for (std::size_t j = 0; j < hdr_size; ++j) {
                     bytes[pos++] = (insn.header >> (j * 8)) & 0xFF;
-                for (std::size_t j = 0; j < imm_size; ++j)
+                }
+                for (std::size_t j = 0; j < imm_size; ++j) {
                     bytes[pos++] = (insn.immediate >> (j * 8)) & 0xFF;
+                }
             }
 
-            return bytecode<max_size>{ bytes, pos };
+            return bytecode<max_size>{bytes, pos};
         }
 
         /// @brief Looks up the instruction index for a given label ID in the label table.
         consteval std::uint64_t find_label_target(const label_table& labels, std::uint64_t label_id) {
-            for (std::size_t i{}; i < labels.size(); ++i)
-                if (labels[i].label_id == label_id)
+            for (std::size_t i{}; i < labels.size(); ++i) {
+                if (labels[i].label_id == label_id) {
                     return labels[i].target_index;
+                }
+            }
             return 0;
         }
 
-        /// @brief Second assembly pass: resolves labels and meta-opcodes, replacing them with real opcodes and jump targets.
-        template<std::size_t N> consteval auto compile_bytecode(
-            const bytecode<N>& code,
-            const architecture& arch
-        ) {
+        /// @brief Second assembly pass: resolves labels and meta-opcodes, replacing them with real
+        /// opcodes and jump targets.
+        template<std::size_t N> consteval auto compile_bytecode(const bytecode<N>& code, const architecture& arch) {
             std::uint8_t result[N]{};
             std::size_t result_pos{};
 
@@ -112,9 +119,7 @@ namespace ngu::pvm {
                 }
 
                 if (entry.data_ct.is_meta) {
-                    auto const real_opcode = resolve_meta(
-                        arch.ops, static_cast<arch::meta_op>(entry.data_ct.opcode)
-                    );
+                    auto const real_opcode = resolve_meta(arch.ops, static_cast<arch::meta_op>(entry.data_ct.opcode));
                     auto const target = find_label_target(labels, entry.data_ct.immediate);
 
                     auto header = insn_decoder::read_header(&code.bytes[entry.offset]);
@@ -136,9 +141,9 @@ namespace ngu::pvm {
                 }
             }
 
-            return bytecode<N>{ result, result_pos };
+            return bytecode<N>{result, result_pos};
         }
-    }
+    } // namespace detail
 
     /**
      * @brief Assembles bytecode from a set of instructions in two passes.
@@ -150,15 +155,18 @@ namespace ngu::pvm {
      * @param insns Instructions to assemble.
      * @return Bytecode ready for execution.
      */
-    template<typename ... Instructions> consteval auto assemble(const architecture& arch, Instructions&&... insns) {
+    template<typename... Instructions> consteval auto assemble(const architecture& arch, Instructions&&... insns) {
         auto intermediate = detail::intermediate_assemble(std::forward<Instructions>(insns)...);
         return detail::compile_bytecode<decltype(intermediate)::capacity()>(intermediate, arch);
     }
-}
+} // namespace ngu::pvm
 
 // Assembles and shrinks bytecode to its exact size at compile time.
-// Uses a captureless consteval lambda as a non-type template parameter to satisfy consteval context requirements.
-#define PVM_ASSEMBLE(arch, ...) \
-    ::ngu::pvm::detail::shrink_to_fit<[]() consteval { return ::ngu::pvm::assemble(arch, __VA_ARGS__); }>()
+// Uses a captureless consteval lambda as a non-type template parameter to satisfy consteval context
+// requirements.
+#define PVM_ASSEMBLE(arch, ...)                                                                                        \
+    ::ngu::pvm::detail::shrink_to_fit<[]() consteval {                                                                 \
+        return ::ngu::pvm::assemble(arch, __VA_ARGS__);                                                                \
+    }>()
 
-#endif //NGU_PVM_CODEGEN_CODEGEN_H
+#endif // NGU_PVM_CODEGEN_CODEGEN_H
