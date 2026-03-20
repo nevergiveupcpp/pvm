@@ -108,7 +108,7 @@ namespace ngu::pvm {
             auto const val = ctx->get_reg(insn.destination());
             auto shift = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             shift &= 63;
-            ctx->set_reg(insn.destination(), (val << shift) | (val >> (64 - shift)));
+            ctx->set_reg(insn.destination(), shift != 0 ? (val << shift) | (val >> (64 - shift)) : val);
         }
     };
 
@@ -117,7 +117,7 @@ namespace ngu::pvm {
             auto const val = ctx->get_reg(insn.destination());
             auto shift = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
             shift &= 63;
-            ctx->set_reg(insn.destination(), (val >> shift) | (val << (64 - shift)));
+            ctx->set_reg(insn.destination(), shift != 0 ? (val >> shift) | (val << (64 - shift)) : val);
         }
     };
 
@@ -166,7 +166,7 @@ namespace ngu::pvm {
 
     struct jne_base {
         PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
-            if (!(ctx->get_flags() & 1)) {
+            if ((ctx->get_flags() & 1) == 0u) {
                 auto const offset = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
                 ctx->jump(ctx->get_pc() + insn.size() + offset);
             }
@@ -175,7 +175,7 @@ namespace ngu::pvm {
 
     struct je_base {
         PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn) {
-            if (ctx->get_flags() & 1) {
+            if ((ctx->get_flags() & 1) != 0u) {
                 auto const offset = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
                 ctx->jump(ctx->get_pc() + insn.size() + offset);
             }
@@ -184,7 +184,7 @@ namespace ngu::pvm {
 
     struct jnei_base {
         PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn, const insn_stream_rt& insn_entries) {
-            if (!(ctx->get_flags() & 1)) {
+            if ((ctx->get_flags() & 1) == 0u) {
                 auto const pos = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
 
                 if (pos >= insn_entries.size()) {
@@ -198,7 +198,7 @@ namespace ngu::pvm {
 
     struct jei_base {
         PVM_FORCEINLINE static void impl(context* ctx, const insn_view& insn, const insn_stream_rt& insn_entries) {
-            if (ctx->get_flags() & 1) {
+            if ((ctx->get_flags() & 1) != 0u) {
                 auto const pos = insn.has_immediate() ? insn.immediate() : ctx->get_reg(insn.source());
 
                 if (pos >= insn_entries.size()) {
