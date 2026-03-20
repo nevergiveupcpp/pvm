@@ -39,8 +39,8 @@ namespace ngu::pvm {
             std::uint64_t rng_state{entropy};
             for (std::size_t i{count - 1}; i > 0; i--) {
                 rng_state = lcg_next(rng_state);
-                std::size_t j{rng_state % (i + 1)};
-                std::uint8_t tmp{arr[i]};
+                std::size_t const j{rng_state % (i + 1)};
+                std::uint8_t const tmp{arr[i]};
                 arr[i] = arr[j];
                 arr[j] = tmp;
             }
