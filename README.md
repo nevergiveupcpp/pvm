@@ -1,7 +1,7 @@
 # PVM (Polymorphic Virtual Machine)
 
 <p align="center">
-  <img src="images/banner.png">
+  <img src="docs/images/banner.png">
 </p>
 
 ## Description
